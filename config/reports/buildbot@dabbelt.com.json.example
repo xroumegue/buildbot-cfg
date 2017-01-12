@@ -1,0 +1,7 @@
+{
+    "type":     "smtp",
+    "from":     "buildbot@dabbelt.com",
+    "relay":    "smtp.gmail.com",
+    "username": "root@dabbelt.com",
+    "password": "?"
+}

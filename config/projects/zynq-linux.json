@@ -1,0 +1,205 @@
+{
+	"name": "zynq",
+	"env" : {
+		"RISCV" :"/srv/artifactory/riscv/opt",
+		"CCACHE_DIR" :"/srv/ccache",
+		"USE_CCACHE" :"1",
+		"PATH" : "/usr/lib/ccache:/opt/Xilinx/SDK/2016.3/gnu/arm/lin/bin:/opt/Xilinx/SDK/2016.3/bin:${PATH}",
+		"CROSS_COMPILE":"arm-xilinx-linux-gnueabi-",
+		"ARCH":"arm",
+		"BASH_ENV" : "/opt/Xilinx/settings.sh"
+
+	},
+	"artifactory" : "/srv/artifactory/xilinx",
+	"codebases" :
+	[
+		{
+			"zturn-vivado-trd" : {
+				"url" 		: "ssh://sauron-git/zturn-vivado-trd.git",
+				"branch"	: "master",
+				"configurations":
+				[
+					{
+						"name": "zturn-vivado-trd",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make",
+										"PROJECT=zturn-trd",
+										"SHELL=/bin/bash",
+										"bit", "hdf", "fsbl"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : ["fsbl.elf", "zturn-trd.bit", "zturn-trd.hdf"]
+						        }
+						]
+					}
+				]
+			}
+		},
+		{
+			"embeddedsw.git" : {
+				"url" 		: "https://github.com/Xilinx/embeddedsw.git",
+				"branch"	: "master",
+				"configurations":
+				[
+					{
+						"name": "fsbl",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"workdir"	: "embeddedsw.git/lib/sw_apps/zynq_fsbl/src",
+								"command" : [ 
+									"make", "-l12","-j12",
+										"BOARD=zc702",
+										"SHELL=/bin/bash",
+										"CFLAGS=-DFSBL_DEBUG_INFO"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : ["fsbl.elf"]
+						        }
+						]
+					}
+				]
+			}
+		},
+		{
+			"linux-xav" : {
+				"url" 		: "ssh://sauron-git/linux.git",
+				"branch"	: "myir/master",
+				"configurations": [
+					{
+						"name": "linux",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make",
+										"zynq_zturn_defconfig"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make", "-l12","-j12",
+										"UIMAGE_LOADADDR=0x8000",
+										"uImage",
+										"zynq-zturn.dtb"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : ["arch/arm/boot/uImage", "arch/arm/boot/dts/zynq-zturn.dtb", "vmlinux"]
+						        }
+						]
+					}
+				]
+			}
+		},
+		{
+			"u-boot-xav" : {
+				"url" 		: "ssh://sauron-git/u-boot.git",
+				"branch" 	: "myir/master",
+				"configurations":
+				[
+					{
+						"name": "u-boot",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make",
+										"zynq_zturn_defconfig"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make", "-l12","-j12"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : ["spl/u-boot-spl", "u-boot.img", "u-boot"]
+						        }
+						]
+					}
+				]
+			}
+		},
+		{
+			"u-boot-scripts" : {
+				"url" 		: "ssh://sauron-git/u-boot-scripts.git",
+				"branch" 	: "master",
+				"configurations":
+				[
+					{
+						"name": "u-boot-scripts",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"make",
+										"-C", "zynq",
+										"clean",
+										"all"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : ["zynq/boot-tftp.img"]
+						        },
+							{
+								"type" : "shell",
+								"command" : [
+									"zturn-vivado-trd/bin/make-boot.sh",
+										"--bootloader", "zturn-vivado-trd/fsbl.elf",
+										"--second", "u-boot-xav/u-boot",
+										"--bit", "zturn-vivado-trd/zturn-trd.bit",
+										"--boot", "boot.bin",
+										"--bif", "boot.bif"
+								],
+								"workdir" : "."
+							},
+						        {
+								"type" : "publish",
+								"files" : ["boot.bin"],
+								"workdir" : "."
+						        }
+						]
+					}
+				]
+			}
+		}
+	]
+}

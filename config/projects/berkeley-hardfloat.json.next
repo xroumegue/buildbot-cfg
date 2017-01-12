@@ -1,0 +1,19 @@
+{
+    "name": "berkeley-hardfloat",
+    "url": "git://github.com/ucb-bar/berkeley-hardfloat.git",
+
+    "configurations": [
+        {
+            "name": "@backend@-rtl",
+            "parameters": [
+                {
+                    "pattern": "@backend@",
+                    "values": ["c"]
+                }
+            ],
+            "steps": [
+                { "command" : ["make", "-j4", "test-@backend@"]}
+            ]
+        }
+    ]
+}

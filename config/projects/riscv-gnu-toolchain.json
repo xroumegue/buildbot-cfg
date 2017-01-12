@@ -1,0 +1,139 @@
+{
+	"name": "riscv-gnu-toolchain",
+	"env" : {
+		"RISCV" :"/srv/artifactory/riscv/toolchain",
+		"CCACHE_DIR" :"/srv/ccache",
+		"USE_CCACHE" :"1",
+		"PATH" : "/usr/lib/ccache:${PATH}"
+	},
+	"codebases" : [
+		{
+			"riscv-newlib" : {
+				"branch" : "riscv-newlib-2.2.0",
+				"url" :"https://github.com/riscv/riscv-newlib.git"
+			}
+		},
+		{
+			"riscv-binutils-gdb" : {
+				"branch" : "riscv-next",
+				"url" : "https://github.com/riscv/riscv-binutils-gdb.git"
+			}
+		},
+		{
+			"riscv-gcc" : {
+				"branch" : "riscv-gcc-6.1.0",
+				"url" : "https://github.com/riscv/riscv-gcc.git"
+			}
+		},
+		{
+			"riscv-dejagnu" : {
+				"branch" : "riscv-dejagnu-1.6",
+				"url" : "https://github.com/riscv/riscv-dejagnu.git"
+			}
+		},
+		{
+			"riscv-glibc" : {
+				"branch" : "riscv-glibc-2.24",
+				"url" :"https://github.com/riscv/riscv-glibc.git"
+			}
+		},
+		{
+			"riscv-gnu-toolchain" : {
+				"branch" : "master",
+				"url": "https://github.com/riscv/riscv-gnu-toolchain.git",
+				"configurations":
+					[
+						{
+							"name": "riscv@xlen@-unknown-linux-gnu @multilib@-multilib @atomic@-atomic @float@-float",
+						"parameters": [
+						        {
+								"pattern": "@xlen@",
+								"values": ["32", "64"]
+						        },
+					        	{
+								"pattern": "@multilib@",
+								"values": ["disable"]
+						        },
+						        {
+								"pattern": "@atomic@",
+								"values": ["enable", "disable"]
+						        },
+						        {
+								"pattern": "@float@",
+								"values": ["enable", "disable"]
+						        }
+						],
+						"steps": [
+					        	{
+								"type" : "git",
+								"submodules" : "True"
+					        	},
+						        {
+								"type" : "configure",
+								"command" : [ 
+									"./configure",
+										"--prefix=${RISCV}/linux-@xlen@-@atomic@-atomic-@float@-float",
+										"--enable-linux",
+										"--with-xlen=@xlen@",
+										"--@multilib@-multilib",
+										"--@atomic@-atomic",
+										"--@float@-float"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"command" : ["make", "-j12"]
+						        },
+						        {
+								"type" : "shell",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+					    	]
+					},
+					{
+						"name": "riscv@xlen@-unknown-elf @atomic@-atomic @float@-float",
+						"parameters": [
+						        {
+								"pattern": "@xlen@",
+								"values": ["32", "64"]
+					        	},
+						        {
+								"pattern": "@atomic@",
+								"values": ["enable", "disable"]
+						        },
+						        {
+								"pattern": "@float@",
+								"values": ["enable", "disable"]
+						        }
+						],
+						"steps": [
+						        {
+								"type" : "git",
+								"submodules" : "True"
+						        },
+						        {
+								"type" : "configure",
+								"command" : [
+									"./configure",
+										"--prefix=${RISCV}/elf-@xlen@-@atomic@-atomic-@float@-float",
+										"--disable-linux",
+										"--with-xlen=@xlen@",
+										"--@atomic@-atomic",
+										"--@float@-float"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"command" : ["make", "-j12"]
+						        },
+						        {
+								"type" : "shell",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+				    		]
+					}
+				]
+			}
+		}
+	]
+}

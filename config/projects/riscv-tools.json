@@ -1,0 +1,198 @@
+{
+	"name": "riscv-tools",
+	"env" : {
+		"RISCV" :"/srv/artifactory/riscv/opt",
+		"CCACHE_DIR" :"/srv/ccache",
+		"USE_CCACHE" :"1",
+		"PATH" : "/usr/lib/ccache:/usr/sbin:/srv/artifactory/riscv/opt/bin:${PATH}"
+	},
+	"artifactory" : "/srv/artifactory/riscv/releases",
+	"codebases" :
+	[
+		{ 
+			"riscv-tools" : {
+				"branch" : "master",
+				"url": "https://github.com/riscv/riscv-tools.git",
+				"configurations":
+					[
+					{
+						"name": "riscv-fesvr",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git",
+								"submodules" : "True"
+							},
+						        {
+								"type" : "configure",
+								"workdir" : "riscv-tools/riscv-fesvr/build",
+								"command" : [ 
+									"../configure",
+										"--prefix=/srv/artifactory/riscv/opt"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"workdir" : "riscv-tools/riscv-fesvr/build",
+								"command" : ["make", "all", "install"]
+						        },
+						        {
+								"type" : "shell",
+								"workdir" : "riscv-tools/riscv-fesvr",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+						]
+					},
+					{
+						"name": "riscv-isa-sim",
+						"parameters": [
+						],
+						"steps": [
+						        {
+								"type" : "configure",
+								"workdir" : "riscv-tools/riscv-isa-sim/build",
+								"command" : [ 
+									"../configure",
+										"--prefix=/srv/artifactory/riscv/opt",
+										"--with-fesvr=/srv/artifactory/riscv/opt"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"workdir" : "riscv-tools/riscv-isa-sim/build",
+								"command" : ["make", "-j12", "all", "install"]
+						        },
+						        {
+								"type" : "shell",
+								"workdir" : "riscv-tools/riscv-isa-sim",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+						]
+					},
+					{
+						"name": "riscv@xlen@-unknown-@linux@-linux @atomic@-atomic @float@-float",
+						"parameters": [
+						        {
+								"pattern": "@xlen@",
+								"values": ["32", "64"]
+							},
+							{
+								"pattern": "@linux@",
+								"values": ["enable", "disable"]
+							},
+						        {
+								"pattern": "@atomic@",
+								"values": ["enable"]
+						        },
+						        {
+								"pattern": "@float@",
+								"values": ["enable"]
+						        }
+						],
+						"steps": [
+						        {
+								"type" : "configure",
+								"workdir" : "riscv-tools/riscv-gnu-toolchain",
+								"command" : [
+									"./configure",
+										"--prefix=/srv/artifactory/riscv/opt",
+										"--@linux@-linux",
+										"--with-xlen=@xlen@",
+										"--@atomic@-atomic",
+										"--@float@-float"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"workdir" : "riscv-tools/riscv-gnu-toolchain",
+								"command" : ["make", "-j12", "all", "install"]
+						        },
+						        {
+								"type" : "shell",
+								"workdir" : "riscv-tools/riscv-gnu-toolchain",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+						]
+					},
+					{
+						"name": "riscv-pk @xlen@",
+						"parameters": [
+	
+						        {
+								"pattern": "@xlen@",
+								"values": ["32", "64"]
+							}
+						],
+						"steps": [
+						        {
+								"type" : "configure",
+								"workdir" : "riscv-tools/riscv-pk/build",
+								"command" : [ 
+									"../configure",
+										"--enable-@xlen@bit",
+										"--prefix=/srv/artifactory/riscv/opt",
+										"--host=riscv@xlen@-unknown-elf"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"workdir" : "riscv-tools/riscv-pk/build",
+								"command" : ["make", "-j12", "all", "install"]
+						        },
+						        {
+								"type" : "shell",
+								"workdir" : "riscv-tools/riscv-pk",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+						]
+					},
+					{
+						"name": "riscv-tests @xlen@",
+						"parameters": [
+	
+						        {
+								"pattern": "@xlen@",
+								"values": ["32", "64"]
+							}
+						],
+						"steps": [
+						        {
+								"type" : "configure",
+								"workdir" : "riscv-tools/riscv-tests/build",
+								"command" : [ 
+									"../configure",
+										"--prefix=/srv/artifactory/riscv/opt/riscv@xlen@-unknown-elf",
+										"--with-xlen=@xlen@"
+								]
+						        },
+						        {
+								"type" : "compile",
+								"workdir" : "riscv-tools/riscv-tests/build",
+								"command" : ["make", "-j12", "all", "install"]
+						        },
+						        {
+								"type" : "shell",
+								"workdir" : "riscv-tools/riscv-tests",
+								"command" : ["git", "clean", "-xdf"]
+						        }
+						]
+					},
+					{
+						"name": "riscv-publish",
+						"parameters": [
+	
+						],
+						"steps": [
+						        {
+								"type" : "publish",
+								"dirs" : { "/srv/artifactory/riscv/opt" : "riscv-tools.tar.bz2" }
+						        }
+						]
+					}
+	
+				]
+			}
+		}
+	]
+}
