@@ -1,0 +1,189 @@
+{
+	"name": "hikey",
+	"env" : {
+		"CCACHE_DIR" :"/srv/ccache",
+		"USE_CCACHE" :"1",
+		"PATH" : "/usr/lib/ccache:/opt/arm-tc/bin:/opt/arm64-tc/bin:${PATH}",
+		"AARCH64_TOOLCHAIN" : "GCC49",
+		"PTABLE" : "linux-8g",
+		"SHELL" : "/bin/bash",
+		"UEFI_TOOLS_DIR" : "../uefi-tools"
+
+	},
+	"artifactory" : "/srv/artifactory/hisilicon/buildbot",
+	"codebases" :
+	[
+		{
+			"LinaroPkg" : {
+				"url" 		: "https://github.com/96boards/LinaroPkg.git",
+				"branch"	: "hikey",
+				"configurations":
+				[
+					{
+						"name": "96boards LinaroPkg",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"uefi-tools" : {
+				"url" 		: "git://git.linaro.org/uefi/uefi-tools.git",
+				"branch"	: "master",
+				"configurations":
+				[
+					{
+						"name": "uefi-tools",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							}
+						]
+					}
+				]
+			}
+		},
+
+		{
+			"arm-trusted-firmware" : {
+				"url" 		: "https://github.com/96boards-hikey/arm-trusted-firmware.git",
+				"branch"	: "hikey",
+				"configurations":
+				[
+					{
+						"name": "hikey-arm-trusted-firmware",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"edk2" : {
+				"url" 		: "https://github.com/96boards/edk2.git",
+				"branch"	: "hikey",
+				"configurations":
+				[
+					{
+						"name": "edk2",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "compile",
+								"command" : [ 
+									"../uefi-tools/uefi-build.sh",
+									"-c", "../LinaroPkg/platforms.config",
+									"-b", "RELEASE",
+									"-a", "../arm-trusted-firmware",
+									"hikey"
+								]
+						        },
+						        {
+								"type" : "publish",
+								"files" : [
+									"edk2/Build/HiKey/RELEASE_GCC49/FV/bl1.bin",
+									"edk2/Build/HiKey/RELEASE_GCC49/FV/fip.bin",
+									"edk2/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi"
+								]
+						        }
+						]
+					}
+				]
+			}
+		},
+		{
+			"l-loader" : {
+				"url" 		: "https://github.com/96boards/l-loader.git",
+				"branch"	: "master",
+				"configurations": [
+					{
+						"name": "l-loader",
+						"parameters": [
+						],
+						"steps": [
+							{
+								"type" : "git"
+							},
+						        {
+								"type" : "shell",
+								"command" : [ "rm", "-f", "start.o", "debug.o", "loader" ]
+						        },
+						        {
+								"type" : "compile",
+								"command" : [ "arm-linux-gnueabihf-gcc", "-c", "-o", "start.o", "start.S" ]
+							},
+							{
+								"type" : "compile",
+								"command" : [ "arm-linux-gnueabihf-gcc", "-c", "-o", "debug.o", "debug.S" ]
+					        	},
+							{
+								"type" : "compile",
+								"command" : [ "arm-linux-gnueabihf-ld",
+										"-Bstatic",
+										"-Tl-loader.lds",
+										"-Ttext", "0xf9800800",
+										"start.o", "debug.o",
+										"-o", "loader"
+								]
+						        },
+						        {
+								"type" : "shell",
+								"command" : [ "rm", "-f", "temp", "l-loader.bin", "prm_table.img", "ptable-linux.img"]
+						        },
+						        {
+								"type" : "shell",
+								"command" : [ "arm-linux-gnueabihf-objcopy",
+										"-O", "binary",
+										"loader", "temp"
+								]
+						        },
+						        {
+								"type" : "shell",
+								"command" : [ "python",
+										"gen_loader.py",
+										"-o", "l-loader.bin",
+										"--img_loader=temp",
+										"--img_bl1=../edk2/Build/HiKey/RELEASE_GCC49/FV/bl1.bin"
+								]
+							},
+						        {
+								"type" : "shell",
+								"command" : ["bash", "-x", "generate_ptable.sh" ]
+							},
+						        {
+								"type" : "shell",
+								"command" : [ "python",
+										"gen_loader.py",
+										"-o", "ptable-linux.img",
+										"--img_prm_ptable=prm_ptable.img"
+								]
+							},
+
+						        {
+								"type" : "publish",
+								"files" : ["l-loader.bin", "ptable-linux.img"]
+						        }
+						]
+					}
+				]
+			}
+		}
+	]
+}
