@@ -15,7 +15,7 @@
 	[
 		{
 			"zturn-vivado-trd" : {
-				"url" 		: "ssh://sauron-git/zturn-vivado-trd.git",
+				"url" 		: "https://github.com/xroumegue/zturn-vivado-trd.git",
 				"branch"	: "master",
 				"configurations":
 				[
@@ -79,9 +79,9 @@
 			}
 		},
 		{
-			"linux-xav" : {
-				"url" 		: "ssh://sauron-git/linux.git",
-				"branch"	: "myir/master",
+			"linux" : {
+				"url" 		: "https://github.com/xroumegue/linux-xlnx.git",
+				"branch"	: "zturn",
 				"configurations": [
 					{
 						"name": "linux",
@@ -117,9 +117,9 @@
 			}
 		},
 		{
-			"u-boot-xav" : {
-				"url" 		: "ssh://sauron-git/u-boot.git",
-				"branch" 	: "myir/master",
+			"u-boot" : {
+				"url" 		: "https://github.com/xroumegue/u-boot-xlnx.git",
+				"branch" 	: "zturn",
 				"configurations":
 				[
 					{
@@ -154,7 +154,7 @@
 		},
 		{
 			"u-boot-scripts" : {
-				"url" 		: "ssh://sauron-git/u-boot-scripts.git",
+				"url" 		: "https://github.com/xroumegue/u-boot-scripts.git",
 				"branch" 	: "master",
 				"configurations":
 				[
