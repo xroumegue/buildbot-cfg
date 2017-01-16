@@ -1,0 +1,6 @@
+/gitpoller-*
+/master.cfg.sample
+/twistd.log
+/twistd.pid
+/http.log
+/state.sqlite
