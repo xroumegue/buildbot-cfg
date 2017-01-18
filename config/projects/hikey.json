@@ -3,14 +3,15 @@
 	"env" : {
 		"CCACHE_DIR" :"/srv/ccache",
 		"USE_CCACHE" :"1",
-		"PATH" : "/usr/lib/ccache:/opt/arm-tc/bin:/opt/arm64-tc/bin:${PATH}",
+		"PATH" : "/usr/lib/ccache:/opt/toolchain/arm-tc/bin:/opt/toolchain/arm64-tc/bin:${PATH}",
 		"AARCH64_TOOLCHAIN" : "GCC49",
+		"EDK2_DIR" : "$pwd",
 		"PTABLE" : "linux-8g",
 		"SHELL" : "/bin/bash",
 		"UEFI_TOOLS_DIR" : "../uefi-tools"
 
 	},
-	"artifactory" : "/srv/artifactory/hisilicon/buildbot",
+	"artifactory" : "/srv/artifactory/hikey/buildbot",
 	"codebases" :
 	[
 		{
@@ -20,7 +21,7 @@
 				"configurations":
 				[
 					{
-						"name": "96boards LinaroPkg",
+						"name": "LinaroPkg",
 						"parameters": [
 						],
 						"steps": [
@@ -59,7 +60,7 @@
 				"configurations":
 				[
 					{
-						"name": "hikey-arm-trusted-firmware",
+						"name": "arm-trusted-firmware",
 						"parameters": [
 						],
 						"steps": [
@@ -98,9 +99,9 @@
 						        {
 								"type" : "publish",
 								"files" : [
-									"edk2/Build/HiKey/RELEASE_GCC49/FV/bl1.bin",
-									"edk2/Build/HiKey/RELEASE_GCC49/FV/fip.bin",
-									"edk2/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi"
+									"Build/HiKey/RELEASE_GCC49/FV/bl1.bin",
+									"Build/HiKey/RELEASE_GCC49/FV/fip.bin",
+									"Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi"
 								]
 						        }
 						]
