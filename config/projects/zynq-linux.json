@@ -4,13 +4,15 @@
 		"RISCV" :"/srv/artifactory/riscv/opt",
 		"CCACHE_DIR" :"/srv/ccache",
 		"USE_CCACHE" :"1",
-		"PATH" : "/usr/lib/ccache:/opt/Xilinx/SDK/2016.3/gnu/arm/lin/bin:/opt/Xilinx/SDK/2016.3/bin:${PATH}",
+		"PATH" : "/usr/lib/ccache:/opt/Xilinx/SDK/2016.4/gnu/arm/lin/bin:/opt/Xilinx/SDK/2016.4/bin:${PATH}",
 		"CROSS_COMPILE":"arm-xilinx-linux-gnueabi-",
 		"ARCH":"arm",
+		"SHELL" : "/bin/bash",
+		"BASH" : "/bin/bash",
 		"BASH_ENV" : "/opt/Xilinx/settings.sh"
 
 	},
-	"artifactory" : "/srv/artifactory/xilinx",
+	"artifactory" : "/srv/artifactory/buildbot/zturn",
 	"codebases" :
 	[
 		{
@@ -71,7 +73,8 @@
 						        },
 						        {
 								"type" : "publish",
-								"files" : ["fsbl.elf"]
+								"files" : ["fsbl.elf"],
+								"workdir"	: "embeddedsw.git/lib/sw_apps/zynq_fsbl/src"
 						        }
 						]
 					}
@@ -184,7 +187,7 @@
 								"command" : [
 									"zturn-vivado-trd/bin/make-boot.sh",
 										"--bootloader", "zturn-vivado-trd/fsbl.elf",
-										"--second", "u-boot-xav/u-boot",
+										"--second", "u-boot/u-boot",
 										"--bit", "zturn-vivado-trd/zturn-trd.bit",
 										"--boot", "boot.bin",
 										"--bif", "boot.bif"
